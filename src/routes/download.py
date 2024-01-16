@@ -2,10 +2,14 @@ import os
 from flask import Blueprint, jsonify, send_from_directory, request
 from flask_jwt_extended import jwt_required
 from src import utils
+from src.handler.FileHandler import FileHandler
 
 download = Blueprint('download', __name__)
 
 download_links = {}
+
+allowed_params = ["type", "smb_name",
+                  "smb_password", "smb_ip_address", "smb_port"]
 
 
 @download.route('/items')
@@ -14,7 +18,7 @@ def items():
     offset = request.args.get('offset', default=0, type=int)
     limit = request.args.get('limit', default=10, type=int)
 
-    downloads = utils.list_uploads(limit, offset)
+    downloads = FileHandler().list_files()
 
     return {"downloads": downloads}
 
@@ -51,7 +55,7 @@ def download_redirect(uuid):
 
         # Zip the folder
         zip_path = utils.zip_folder(path)
-        name = os.path.basename(zip_path) # get the name of the zip file
+        name = os.path.basename(zip_path)  # get the name of the zip file
 
         print(zip_path, name)
 
