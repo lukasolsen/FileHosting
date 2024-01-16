@@ -1,6 +1,7 @@
 from smb.SMBConnection import SMBConnection
 import os
 from src.utils import get_manifest
+from pathlib import Path
 
 
 class SMBHandler(object):
@@ -32,11 +33,11 @@ class SMBHandler(object):
         folders = self.list_folders()
         manifests = []
         for folder in folders:
-            folder_path = os.path.join(os.getenv("smb_path"), folder)
+            folder_path = os.path.join(folder)
 
             manifest_path = os.path.join(folder_path, 'manifest.json')
 
-            if not self.file_exists(os.getenv("smb_path") + "/" + folder + "/manifest.json"):
+            if not self.file_exists(manifest_path):
                 print("Manifest not found", manifest_path)
                 continue
 
@@ -49,11 +50,11 @@ class SMBHandler(object):
         return manifests
 
     def file_exists(self, filepath):
-        # Retrieve the file from the smb server, if we get any bytes then the file exists.Cancel it early when we got a byte
         try:
-            file_attributes, file_size = self.smb.retrieveFile(
-                os.getenv("smb_name"), filepath, None)
-        except:
+            if (self.smb.getAttributes(os.getenv("smb_name"), filepath).isDirectory):
+                return False
+        except Exception as e:
+            print("Error", e)
             return False
 
         return True
@@ -61,14 +62,14 @@ class SMBHandler(object):
     def read_file(self, filepath):
         # Read the actual contents of the file, then parse it as JSON
         try:
-            file_attributes, file_size = self.smb.retrieveFile(
-                os.getenv("smb_name"), filepath, None)
-        except:
+            file_obj = open(Path(filepath).resolve(), 'rb')
+            data = file_obj.read()
+            file_obj.close()
+            return data
+
+        except Exception as e:
+            print("Error", e)
             return None
-
-        print("File attributes", file_attributes)
-
-        return file_attributes
 
     def download_file(self, filename):
         file_obj = open(filename, 'wb')
