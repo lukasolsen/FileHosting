@@ -1,11 +1,9 @@
 from src.routes.download import download
 from src.routes.user import user
-from flask import Flask, request, send_from_directory, jsonify
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask import Flask
+from flask_jwt_extended import JWTManager
 import os
-import uuid
-from src import utils
-from src.database import db, User
+from src.database import db
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -23,9 +21,6 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 app.secret_key = 'secret'
 
 
@@ -39,5 +34,11 @@ def home():
 
 
 if __name__ == '__main__':
-    # Store download links temporarily in memory (consider using a more robust solution)
-    app.run(debug=True, host='192.168.98.221', port=5000)
+    if os.getenv("location_type").lower() == "local":
+        required_folders = ["files", "indexes", "images"]
+        for folder in required_folders:
+            path = os.path.join(os.getenv("local_path"), folder)
+            if not os.path.exists(path):
+                os.mkdir(path)
+
+    app.run(debug=True, host=os.getenv("ip_address"), port=os.getenv("port"))

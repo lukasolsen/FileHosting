@@ -1,4 +1,4 @@
-enviroment/
-instance/
-uploads/
-__pycache__/
+*enviroment/
+*instance/
+*uploads/
+*__pycache__/

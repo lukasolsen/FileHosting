@@ -1,24 +1,29 @@
+import urllib
 from smb.SMBConnection import SMBConnection
+from smb.SMBHandler import SMBHandler
 import os
-from src.utils import get_manifest
 from pathlib import Path
 
 
-class SMBHandler(object):
+class SMBManager(object):
     def __new__(cls):
         if not hasattr(cls, 'instance'):
-            cls.instance = super(SMBHandler, cls).__new__(cls)
+            cls.instance = super(SMBManager, cls).__new__(cls)
         return cls.instance
 
     def __init__(self):
-        print("Initializing SMBHandler", os.getenv("smb_user"))
+        print("Initializing SMBManager", os.getenv("smb_user"))
         self.smb = SMBConnection(os.getenv("smb_user"), os.getenv("smb_pass"), 'my_client',
                                  'server_name', use_ntlm_v2=True)
 
         self.connect()
 
     def connect(self):
-        self.smb.connect(os.getenv("smb_ip"), 139)
+        try:
+            self.smb.connect(os.getenv("smb_ip"),
+                             os.getenv("smb_port"), timeout=30)
+        except Exception as e:
+            print("Error", e)
 
     def list_files(self, path=os.getenv("smb_path")):
         files = self.smb.listPath(os.getenv("smb_name"), path)
@@ -86,10 +91,10 @@ class SMBHandler(object):
             if not os.path.exists(os.path.join(root, 'manifest.json')):
                 continue
 
-            manifest = get_manifest(os.path.join(root, 'manifest.json'))
+            # manifest = get_manifest(os.path.join(root, 'manifest.json'))
 
-            if manifest and int(manifest.get("id")) == int(id):
-                return root
+            # if manifest and int(manifest.get("id")) == int(id):
+            #    return root
 
         return None
 
