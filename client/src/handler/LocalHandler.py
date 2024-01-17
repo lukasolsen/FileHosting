@@ -48,6 +48,9 @@ class LocalManager:
 
         return None
 
+    def correct_filepath(self, filepath):
+        return filepath
+
     def file_exists(self, filepath):
         return os.path.exists(filepath)
 

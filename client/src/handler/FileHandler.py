@@ -12,19 +12,31 @@ class FileHandler:
     def __init__(self) -> None:
         self.type = os.getenv("location_type")
 
-
     def list_files(self, limit=10, offset=0):
         if self.type.lower() == "local":
             return LocalManager().find_items()
         elif self.type.lower() == "smb":
-            return SMBManager().find_items()
+            items = SMBManager().find_items()
+            print(items)
+            if items is not None:
+                return items
+            else:
+                return []
 
         return []
 
-    def find_item(self, id):  # id is the folder name
+    def find_item(self, id):
         if self.type.lower() == "local":
             return LocalManager().find_item(id)
         elif self.type.lower() == "smb":
             return SMBManager().find_item(id)
+
+        return None
+
+    def correct_filepath(self, filepath):
+        if self.type.lower() == "local":
+            return LocalManager().correct_filepath(filepath)
+        elif self.type.lower() == "smb":
+            return SMBManager().correct_filepath(filepath)
 
         return None

@@ -18,6 +18,10 @@ def is_valid_token(token):
     return token in DOWNLOAD_LINKS
 
 
+def remove_token(token):
+    DOWNLOAD_LINKS.pop(token)
+
+
 def get_file_identifier(token):
     return DOWNLOAD_LINKS.get(token)
 

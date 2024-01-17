@@ -1,9 +1,9 @@
 import os
-from flask import Blueprint, jsonify, send_file, request
+from flask import Blueprint, jsonify, send_file, request, send_from_directory
 from flask_jwt_extended import jwt_required
 from src import utils
 from src.handler.FileHandler import FileHandler
-import datetime
+from pathlib import Path
 
 download = Blueprint('download', __name__)
 
@@ -46,6 +46,11 @@ def download_redirect(token):
         return {"message": "Invalid token"}, 404
 
     file_path = utils.get_file_identifier(token)
-    print(file_path)
 
-    return send_file(file_path, as_attachment=True)
+    correct_filepath = FileHandler().correct_filepath(file_path)
+    print(correct_filepath, file_path, str(
+        correct_filepath).replace(file_path, ""))
+
+    utils.remove_token(token)
+
+    return send_from_directory(str(correct_filepath).replace(file_path, ""), file_path, as_attachment=True)
